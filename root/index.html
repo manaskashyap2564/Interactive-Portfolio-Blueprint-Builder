@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Portfolio Blueprint Builder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals & Subtle Accents -->
+    <!-- Application Structure Plan: A multi-section, single-page application designed as a "Portfolio Blueprint Builder." It follows a logical user flow: 1. Hero/Vision (Introduction), 2. Foundation (Interactive Core Components), 3. Aesthetics (Visualizing Design Trends), 4. The Engine (Demystifying GitHub Integration with a chart and a simulated API explorer), 5. Blueprint (A usable, collapsible/copyable version of the final prompt), and 6. Next Steps (Maintenance). This structure turns a static report into an interactive learning tool, guiding the user from high-level concepts to a tangible, actionable output, which is more effective for understanding and application than a simple linear document. -->
+    <!-- Visualization & Content Choices: The application uses a variety of interactive elements tailored to the content. 'Core Components' are interactive cards (HTML/JS) for focused learning. 'Design Trends' are demonstrated visually in a gallery to make them tangible. A 'Why GitHub?' Chart.js bar chart quantifies the benefits. The core 'GitHub API Explorer' uses JS to simulate API calls, connecting raw data to UI elements, which is the most effective way to teach this concept. Finally, the 'Prompt' section uses collapsible accordions (HTML/JS) for usability and a copy-to-clipboard function for utility. All choices prioritize interaction and understanding over static presentation. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF8;
+            color: #382F2F;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        .nav-link {
+            transition: color 0.3s, border-color 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #D97706; /* amber-600 */
+            border-color: #D97706;
+        }
+        .component-card, .trend-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .component-card:hover, .trend-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .api-btn.active {
+            background-color: #D97706;
+            color: #FFFFFF;
+            border-color: #D97706;
+        }
+        .tooltip {
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .has-tooltip:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header & Navigation -->
+    <header id="header" class="bg-white/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-amber-700">Portfolio Blueprint</h1>
+            <div class="hidden md:flex space-x-6">
+                <a href="#foundation" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">Foundation</a>
+                <a href="#aesthetics" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">Aesthetics</a>
+                <a href="#engine" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">The Engine</a>
+                <a href="#blueprint" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">Blueprint</a>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
+            <a href="#foundation" class="block py-2 text-gray-600">Foundation</a>
+            <a href="#aesthetics" class="block py-2 text-gray-600">Aesthetics</a>
+            <a href="#engine" class="block py-2 text-gray-600">The Engine</a>
+            <a href="#blueprint" class="block py-2 text-gray-600">Blueprint</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+
+        <!-- Vision Section -->
+        <section id="vision" class="text-center mb-24">
+            <h2 class="text-4xl md:text-5xl font-bold mb-4">Build Your Digital Masterpiece</h2>
+            <p class="max-w-3xl mx-auto text-lg text-gray-600">
+                This tool transforms the comprehensive strategy for a state-of-the-art portfolio into an interactive experience. Explore the core principles, understand the technology, and generate a powerful prompt to create a website that truly represents your skills and captivates potential employers.
+            </p>
+        </section>
+
+        <!-- Foundation Section -->
+        <section id="foundation" class="mb-24 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold">The Foundation: Core Components</h3>
+                <p class="max-w-2xl mx-auto text-gray-600 mt-2">A great portfolio is built on a few essential pillars. Each component serves a unique purpose in telling your professional story. Click on each card to explore its role and discover key insights on how to make it effective.</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Component Cards will be injected here by JS -->
+            </div>
+            <div id="component-details" class="mt-8 p-8 bg-white rounded-lg shadow-lg hidden">
+                <!-- Details will be shown here -->
+            </div>
+        </section>
+
+        <!-- Aesthetics Section -->
+        <section id="aesthetics" class="mb-24 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold">Aesthetics: 2025 Design Trends</h3>
+                <p class="max-w-2xl mx-auto text-gray-600 mt-2">A modern portfolio must be visually compelling. It's not just about looking good; it's about creating an intuitive and memorable user experience. Interact with these key 2025 design trends to see how they can elevate your site.</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                 <!-- Trend Cards will be injected here by JS -->
+            </div>
+        </section>
+
+        <!-- The Engine Section -->
+        <section id="engine" class="mb-24 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold">The Engine: GitHub Integration</h3>
+                <p class="max-w-2xl mx-auto text-gray-600 mt-2">Dynamic GitHub integration is what transforms a static page into a living showcase of your work. It provides verifiable proof of your skills and keeps your portfolio effortlessly up-to-date. Explore why this is crucial and how it works technically.</p>
+            </div>
+            <div class="grid lg:grid-cols-5 gap-8 items-start">
+                <div class="lg:col-span-2">
+                    <h4 class="text-xl font-semibold mb-4 text-center">Why GitHub is Indispensable</h4>
+                     <div class="chart-container">
+                        <canvas id="githubImportanceChart"></canvas>
+                    </div>
+                </div>
+                <div class="lg:col-span-3 bg-white p-6 rounded-lg shadow-lg">
+                    <h4 class="text-xl font-semibold mb-4 text-center">Interactive API Explorer</h4>
+                    <p class="text-center text-gray-500 mb-4 text-sm">Click an endpoint to see how raw data from the GitHub API translates into a portfolio project card.</p>
+                    <div class="flex flex-wrap justify-center gap-2 mb-4">
+                        <button class="api-btn border border-gray-300 px-3 py-1 rounded-full text-sm transition" data-endpoint="repos">GET /users/{username}/repos</button>
+                        <button class="api-btn border border-gray-300 px-3 py-1 rounded-full text-sm transition" data-endpoint="readme">GET /repos/{owner}/{repo}/readme</button>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-6 items-start">
+                        <div id="api-project-card" class="bg-gray-50 p-4 rounded-md border border-gray-200 h-full flex flex-col justify-center">
+                            <!-- Project card will be updated here -->
+                             <div class="text-center text-gray-400">Select an API endpoint</div>
+                        </div>
+                        <div class="bg-gray-800 text-white p-4 rounded-md font-mono text-xs h-64 overflow-auto">
+                            <pre><code id="api-response-viewer">// JSON response will appear here</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Blueprint Section -->
+        <section id="blueprint" class="scroll-mt-20">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold">The Blueprint: Your Comprehensive Prompt</h3>
+                <p class="max-w-2xl mx-auto text-gray-600 mt-2">This is your final, actionable output. We've synthesized the entire report into a detailed, structured prompt. Use this to instruct an advanced AI (or a human developer) to build your perfect portfolio. Expand each section to review the details.</p>
+            </div>
+            <div id="prompt-accordion" class="bg-white rounded-lg shadow-lg p-4 md:p-8">
+                <!-- Accordion items will be injected by JS -->
+            </div>
+            <div class="text-center mt-6">
+                 <button id="copy-prompt-btn" class="bg-amber-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-amber-700 transition shadow-md">
+                    Copy Entire Prompt
+                </button>
+                 <div id="copy-feedback" class="text-green-600 mt-2 h-5"></div>
+            </div>
+
+            <!-- AI-Powered Prompt Refiner -->
+            <div class="mt-16 pt-8 border-t border-gray-200">
+                <h3 class="text-3xl font-bold text-center mb-4">✨ AI-Powered Prompt Refiner</h3>
+                <p class="max-w-2xl mx-auto text-gray-600 text-center mb-6">Have a rough idea for your portfolio? Input a brief description, and our AI will expand it into a comprehensive prompt, ready for your next project!</p>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <textarea id="refine-prompt-input" class="w-full p-3 border border-gray-300 rounded-md focus:ring-amber-500 focus:border-amber-500" rows="6" placeholder="e.g., 'Make a portfolio for a software engineer focusing on AI projects and open source contributions.'"></textarea>
+                    <button id="refine-prompt-btn" class="mt-4 bg-orange-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-600 transition shadow-md w-full">
+                        Refine Prompt ✨
+                    </button>
+                    <div id="refine-prompt-loading" class="text-center text-gray-500 mt-4 hidden">Generating...</div>
+                    <div id="refine-prompt-output" class="mt-6 p-4 bg-gray-50 rounded-md border border-gray-200 whitespace-pre-wrap text-gray-700 text-sm"></div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-24">
+        <div class="container mx-auto px-6 py-4 text-center">
+            <p>Interactive Portfolio Blueprint Builder &copy; 2025</p>
+            <p class="text-sm text-gray-400">An interactive visualization of a strategic report.</p>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Gemini API Key (Canvas will automatically provide this at runtime)
+    const apiKey = ""; 
+
+    // Data
+    const componentsData = [
+        {
+            title: "About Me Section",
+            icon: "👤",
+            short: "The narrative of your professional journey.",
+            details: "This is your chance to build a human connection. Provide a compelling narrative detailing your background, skills, and personal story. It's an opportunity to build trust and allow visitors to understand your journey and aspirations. Don't just list facts; tell a story.",
+            isLLMPowered: true // Mark this component as having LLM capabilities
+        },
+        {
+            title: "Projects Section",
+            icon: "📂",
+            short: "The centerpiece of your work and skills.",
+            details: "This is the core of your website. Feature a curated selection of your best work, not everything you've ever done. Quality trumps quantity. Each project should have detailed descriptions, high-quality visuals (images, videos, prototypes), and comprehensive case studies that explain the problem, your process, and the outcome."
+        },
+        {
+            title: "Skills Section",
+            icon: "💡",
+            short: "A clear, concise display of your technical abilities.",
+            details: "A clear and concise display of your technical proficiencies is essential. Present these as stylish tags or organized lists for easy readability and quick comprehension by recruiters and clients. Group them logically (e.g., Languages, Frameworks, Tools)."
+        },
+        {
+            title: "Contact Information",
+            icon: "✉️",
+            short: "Make it easy for visitors to reach you.",
+            details: "Accessibility is key. Provide easily discoverable contact forms, email addresses, and links to relevant social media profiles like LinkedIn and GitHub. A simple, functional contact form is a must-have to capture leads and inquiries."
+        },
+        {
+            title: "Testimonials",
+            icon: "💬",
+            short: "Build credibility with social proof.",
+            details: "Build credibility by including client feedback or endorsements from colleagues. This 'social proof' is an effective way to build trust with potential employers or clients before they even speak to you. Ask for specific, result-oriented testimonials."
+        },
+        {
+            title: "Clear Call-to-Actions (CTAs)",
+            icon: "🎯",
+            short: "Guide users toward desired actions.",
+            details: "Strategically placed prompts are crucial for guiding users toward desired actions. Use clear, compelling language like 'View Project,' 'Contact Me,' or 'Download Resume.' CTAs should be visually distinct and stand out from other page elements to be effective."
+        }
+    ];
+
+    const trendsData = [
+        { title: "Digital Comfort Colors", description: "Rich, warm tones that reduce visual fatigue and guide users naturally.", exampleClass: "bg-amber-100 border-amber-300" },
+        { title: "Expressive Typography", description: "Bold, high-contrast font pairings create visual impact and convey personality.", exampleClass: "font-serif italic text-2xl" },
+        { title: "Purposeful Animation", description: "Subtle micro-interactions on buttons and links to provide feedback and engage users.", exampleClass: "trend-button" },
+        { title: "Strategic Negative Space", description: "Ample whitespace enhances readability and brings focus to important content.", exampleClass: "p-8" },
+        { title: "Bold, Block-Based Layouts", description: "Strong grid structures paired with vibrant color contrasts to organize content clearly.", exampleClass: "grid grid-cols-2 gap-2" },
+        { title: "Dark Mode Option", description: "A popular feature for user comfort, offering an alternative high-contrast viewing experience.", exampleClass: "bg-gray-800 text-white" }
+    ];
+    
+    const promptData = {
+        "Overall Goal and Vision": "Create a highly professional, visually stunning, and technically sophisticated portfolio website that dynamically showcases my software development projects hosted on GitHub, designed to attract potential employers and clients. The website must be fully functional, up-to-date, incorporate the latest web features, be highly responsive, load quickly, be SEO-optimized, and provide an exceptional user experience.",
+        "Functional Requirements": "Dynamic Project Listing from GitHub. Detailed, dynamically generated Project Pages with rendered READMEs. Filtering/Sorting options for projects. A secure Contact Form. Fully responsive navigation. Links to live demos on GitHub Pages. Social media icon links.",
+        "Content Specifications": "About Me section with bio, skills, and story. Projects section displaying name, description, README, repo URL, live demo URL, technologies, and dynamic metrics (stars, forks, last updated). A Testimonials section for social proof.",
+        "Design and UX Guidelines": "Clean, minimalist aesthetic with ample negative space. Modern color palette (warm, high-contrast). Expressive typography. Clear visual hierarchy. Purposeful micro-interactions and animations. Mobile-first responsive design. Intuitive navigation. Visually prominent CTAs. Full accessibility (WCAG).",
+        "Technical Implementation Directives": "Primary framework: Next.js (React). GitHub API Integration via secure, server-side API routes (to protect PAT). Fetch data from /users/{username}/repos and /repos/{owner}/{repo}/contents/README.md. Implement loading states and error handling. Use modular, reusable React components. Style with Tailwind CSS.",
+        "Performance, SEO, and Accessibility": "Mandatory speed optimization (minification, image compression). Excellent Core Web Vitals scores. Semantic HTML, dynamic meta tags, and descriptive URLs for SEO. Full keyboard navigability and ARIA attribute usage for accessibility."
+    };
+
+    const apiMockData = {
+        repos: {
+            card: {
+                name: "dev-portfolio-template",
+                description: "A modern, dynamic portfolio built with Next.js and Tailwind CSS.",
+                language: "TypeScript",
+                stars: 128,
+                forks: 42,
+                updated: "2025-06-08"
+            },
+            json: JSON.stringify([
+                {
+                  "name": "dev-portfolio-template",
+                  "html_url": "https://github.com/user/dev-portfolio",
+                  "description": "A modern, dynamic portfolio...",
+                  "language": "TypeScript",
+                  "stargazers_count": 128,
+                  "forks_count": 42,
+                  "updated_at": "2025-06-08T10:30:00Z",
+                  "topics": ["react", "nextjs", "portfolio"]
+                }
+            ], null, 2)
+        },
+        readme: {
+            card: {
+                 name: "dev-portfolio-template",
+                 readme: "<h3>Project Overview</h3><p>This project aims to provide a best-in-class template for developers...</p><h4>Tech Stack</h4><ul><li>Next.js</li><li>React</li><li>Tailwind CSS</li></ul>"
+            },
+            json: JSON.stringify({
+                "name": "README.md",
+                "path": "README.md",
+                "content": "SDRlbiBQcm9qZWN0IE92ZXJ2aWV3...",
+                "encoding": "base64"
+            }, null, 2)
+        }
+    };
+
+    // Mobile Menu
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    // Active Nav Link on Scroll
+    const sections = document.querySelectorAll('section');
+    const navLinks = document.querySelectorAll('.nav-link');
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            if (pageYOffset >= sectionTop - 100) {
+                current = section.getAttribute('id');
+            }
+        });
+
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href').includes(current)) {
+                link.classList.add('active');
+            }
+        });
+    });
+
+    // Component Cards
+    const componentsContainer = document.querySelector('#foundation .grid');
+    const componentDetailsContainer = document.getElementById('component-details');
+    let lastSelectedComponent = null;
+
+    componentsData.forEach((component, index) => {
+        const card = document.createElement('div');
+        card.className = "component-card bg-white p-6 rounded-lg shadow-md cursor-pointer border-2 border-transparent";
+        card.innerHTML = `
+            <div class="text-4xl mb-4">${component.icon}</div>
+            <h4 class="font-bold text-xl mb-2">${component.title}</h4>
+            <p class="text-gray-600">${component.short}</p>
+        `;
+        card.addEventListener('click', () => {
+            if (lastSelectedComponent === card) {
+                componentDetailsContainer.classList.add('hidden');
+                card.classList.remove('border-amber-500');
+                lastSelectedComponent = null;
+            } else {
+                componentDetailsContainer.innerHTML = `
+                    <h4 class="font-bold text-2xl mb-2 flex items-center"><span class="text-3xl mr-3">${component.icon}</span> ${component.title}</h4>
+                    <p class="text-gray-700 text-lg">${component.details}</p>
+                `;
+
+                // Add LLM feature for "About Me Section"
+                if (component.isLLMPowered) {
+                    componentDetailsContainer.innerHTML += `
+                        <div class="mt-8 pt-6 border-t border-gray-200">
+                            <h5 class="font-semibold text-xl mb-4">✨ Generate Your About Me Section</h5>
+                            <p class="text-gray-600 text-sm mb-4">Tell us about your role, industry, or aspirations, and we'll draft a starting point for your 'About Me' section.</p>
+                            <input type="text" id="about-me-input" class="w-full p-2 border border-gray-300 rounded-md focus:ring-amber-500 focus:border-amber-500" placeholder="e.g., 'software engineer, AI, open source'">
+                            <button id="generate-about-me-btn" class="mt-4 bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition shadow-md w-full">
+                                Generate About Me ✨
+                            </button>
+                            <div id="about-me-loading" class="text-center text-gray-500 mt-4 hidden">Generating...</div>
+                            <div id="about-me-output" class="mt-6 p-4 bg-gray-50 rounded-md border border-gray-200 whitespace-pre-wrap text-gray-700 text-sm"></div>
+                        </div>
+                    `;
+                    const generateAboutMeBtn = document.getElementById('generate-about-me-btn');
+                    const aboutMeInput = document.getElementById('about-me-input');
+                    const aboutMeOutput = document.getElementById('about-me-output');
+                    const aboutMeLoading = document.getElementById('about-me-loading');
+
+                    generateAboutMeBtn.addEventListener('click', async () => {
+                        const prompt = `Generate a concise and engaging 'About Me' section for a professional portfolio website. The individual is a ${aboutMeInput.value || 'professional'}. Focus on their skills, aspirations, and what makes them unique. Keep it to around 100-150 words.`;
+                        aboutMeLoading.classList.remove('hidden');
+                        aboutMeOutput.textContent = '';
+                        try {
+                            let chatHistory = [];
+                            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                            const payload = { contents: chatHistory };
+                            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                            const response = await fetch(apiUrl, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(payload)
+                            });
+                            const result = await response.json();
+                            if (result.candidates && result.candidates.length > 0 &&
+                                result.candidates[0].content && result.candidates[0].content.parts &&
+                                result.candidates[0].content.parts.length > 0) {
+                                const text = result.candidates[0].content.parts[0].text;
+                                aboutMeOutput.textContent = text;
+                            } else {
+                                aboutMeOutput.textContent = 'Failed to generate About Me section.';
+                                console.error('Gemini API response structure unexpected:', result);
+                            }
+                        } catch (error) {
+                            aboutMeOutput.textContent = 'Error generating About Me section. Please try again.';
+                            console.error('Error calling Gemini API:', error);
+                        } finally {
+                            aboutMeLoading.classList.add('hidden');
+                        }
+                    });
+                }
+
+
+                componentDetailsContainer.classList.remove('hidden');
+                if(lastSelectedComponent) lastSelectedComponent.classList.remove('border-amber-500');
+                card.classList.add('border-amber-500');
+                lastSelectedComponent = card;
+                componentDetailsContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+        componentsContainer.appendChild(card);
+    });
+
+    // Trend Cards
+    const trendsContainer = document.querySelector('#aesthetics .grid');
+    trendsData.forEach(trend => {
+        const card = document.createElement('div');
+        card.className = "trend-card bg-white p-6 rounded-lg shadow-md";
+        let exampleHTML = '';
+        if (trend.exampleClass.includes('trend-button')) {
+            exampleHTML = `<button class="mt-4 bg-amber-600 text-white px-4 py-2 rounded-lg transition-transform duration-300 hover:scale-110">Hover Me</button>`;
+        } else if (trend.exampleClass.includes('grid')) {
+            exampleHTML = `<div class="mt-4 ${trend.exampleClass} h-16"><div class="bg-amber-200 rounded"></div><div class="bg-stone-400 rounded"></div><div class="bg-stone-400 rounded"></div><div class="bg-amber-200 rounded"></div></div>`;
+        } else {
+            exampleHTML = `<div class="mt-4 p-4 rounded-md border ${trend.exampleClass}">Example</div>`;
+        }
+
+        card.innerHTML = `
+            <h4 class="font-bold text-xl mb-2">${trend.title}</h4>
+            <p class="text-gray-600">${trend.description}</p>
+            ${exampleHTML}
+        `;
+        trendsContainer.appendChild(card);
+    });
+
+    // Chart.js
+    const ctx = document.getElementById('githubImportanceChart').getContext('2d');
+    const githubImportanceChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Code Quality', 'Collaboration', 'Continuous Learning', 'Version Control'],
+            datasets: [{
+                label: 'Importance Score',
+                data: [95, 85, 90, 80],
+                backgroundColor: [
+                    'rgba(180, 83, 9, 0.7)', // amber-700
+                    'rgba(217, 119, 6, 0.7)', // amber-600
+                    'rgba(245, 158, 11, 0.7)', // amber-500
+                    'rgba(251, 191, 36, 0.7)' // amber-400
+                ],
+                borderColor: [
+                    'rgb(180, 83, 9)',
+                    'rgb(217, 119, 6)',
+                    'rgb(245, 158, 11)',
+                    'rgb(251, 191, 36)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.x !== null) {
+                                label += context.parsed.x;
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            }
+        }
+    });
+
+    // API Explorer
+    const apiBtns = document.querySelectorAll('.api-btn');
+    const projectCardContainer = document.getElementById('api-project-card');
+    const responseViewer = document.getElementById('api-response-viewer');
+
+    apiBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            apiBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const endpoint = btn.dataset.endpoint;
+            const data = apiMockData[endpoint];
+
+            if (endpoint === 'repos') {
+                 projectCardContainer.innerHTML = `
+                    <h5 class="font-bold text-lg">${data.card.name}</h5>
+                    <p class="text-sm text-gray-600 my-2">${data.card.description}</p>
+                    <div class="text-xs mt-auto">
+                        <span class="inline-block bg-blue-100 text-blue-800 rounded-full px-2 py-1 mr-2">${data.card.language}</span>
+                        <span class="inline-block relative has-tooltip">
+                            ⭐ ${data.card.stars}
+                            <span class="tooltip absolute bottom-full mb-2 w-28 text-center bg-gray-800 text-white text-xs rounded py-1 px-2">Stargazers</span>
+                        </span>
+                        <span class="inline-block ml-2 relative has-tooltip">
+                             🍴 ${data.card.forks}
+                             <span class="tooltip absolute bottom-full mb-2 w-28 text-center bg-gray-800 text-white text-xs rounded py-1 px-2">Forks</span>
+                        </span>
+                        <p class="text-gray-500 mt-2">Updated: ${data.card.updated}</p>
+                    </div>
+                 `;
+            } else if (endpoint === 'readme') {
+                 projectCardContainer.innerHTML = `
+                    <h5 class="font-bold text-lg mb-2">${data.card.name}</h5>
+                    <div class="text-sm text-gray-700 prose prose-sm">${data.card.readme}</div>
+                 `;
+            }
+           
+            responseViewer.textContent = data.json;
+        });
+    });
+
+    // Prompt Accordion
+    const accordionContainer = document.getElementById('prompt-accordion');
+    Object.entries(promptData).forEach(([key, value], index) => {
+        const item = document.createElement('div');
+        item.className = "border-b border-gray-200 last:border-b-0";
+        item.innerHTML = `
+            <button class="accordion-btn w-full text-left p-4 flex justify-between items-center hover:bg-gray-50 focus:outline-none">
+                <span class="font-semibold text-lg text-amber-800">${index + 1}. ${key}</span>
+                <span class="accordion-icon text-2xl font-thin transform transition-transform duration-300">+</span>
+            </button>
+            <div class="accordion-content">
+                <p class="p-4 pt-0 text-gray-600">${value}</p>
+            </div>
+        `;
+        accordionContainer.appendChild(item);
+    });
+
+    const accordionBtns = document.querySelectorAll('.accordion-btn');
+    accordionBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const content = btn.nextElementSibling;
+            const icon = btn.querySelector('.accordion-icon');
+            const isOpen = content.style.maxHeight && content.style.maxHeight !== '0px';
+
+            accordionBtns.forEach(otherBtn => {
+                otherBtn.nextElementSibling.style.maxHeight = '0px';
+                otherBtn.querySelector('.accordion-icon').style.transform = 'rotate(0deg)';
+            });
+
+            if (!isOpen) {
+                content.style.maxHeight = content.scrollHeight + "px";
+                icon.style.transform = 'rotate(45deg)';
+            }
+        });
+    });
+    
+    // Copy Prompt
+    const copyBtn = document.getElementById('copy-prompt-btn');
+    const copyFeedback = document.getElementById('copy-feedback');
+    copyBtn.addEventListener('click', () => {
+        let fullPrompt = "";
+        Object.entries(promptData).forEach(([key, value]) => {
+            fullPrompt += `## ${key}\n\n${value}\n\n`;
+        });
+        
+        const textarea = document.createElement('textarea');
+        textarea.value = fullPrompt.trim();
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            document.execCommand('copy');
+            copyFeedback.textContent = 'Prompt copied to clipboard!';
+        } catch (err) {
+            copyFeedback.textContent = 'Failed to copy.';
+            console.error('Failed to copy text: ', err);
+        }
+        document.body.removeChild(textarea);
+        
+        setTimeout(() => { copyFeedback.textContent = ''; }, 3000);
+    });
+
+    // AI-Powered Prompt Refiner Logic
+    const refinePromptBtn = document.getElementById('refine-prompt-btn');
+    const refinePromptInput = document.getElementById('refine-prompt-input');
+    const refinePromptOutput = document.getElementById('refine-prompt-output');
+    const refinePromptLoading = document.getElementById('refine-prompt-loading');
+
+    refinePromptBtn.addEventListener('click', async () => {
+        const userPrompt = refinePromptInput.value.trim();
+        if (!userPrompt) {
+            refinePromptOutput.textContent = 'Please enter a brief prompt to refine.';
+            return;
+        }
+
+        const llmPrompt = `As an expert in frontend development and UI/UX design, expand the following brief request into a comprehensive, structured prompt for generating a modern portfolio website. The refined prompt should cover: Overall Goal and Vision, Functional Requirements, Content Specifications, Design and UX Guidelines, Technical Implementation Directives, and Performance, SEO, and Accessibility. Aim for a level of detail similar to a professional project brief, using clear headings for each section. The user's initial request is: '${userPrompt}'`;
+        
+        refinePromptLoading.classList.remove('hidden');
+        refinePromptOutput.textContent = '';
+
+        try {
+            let chatHistory = [];
+            chatHistory.push({ role: "user", parts: [{ text: llmPrompt }] });
+            const payload = { contents: chatHistory };
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const result = await response.json();
+            if (result.candidates && result.candidates.length > 0 &&
+                result.candidates[0].content && result.candidates[0].content.parts &&
+                result.candidates[0].content.parts.length > 0) {
+                const text = result.candidates[0].content.parts[0].text;
+                refinePromptOutput.textContent = text;
+            } else {
+                refinePromptOutput.textContent = 'Failed to refine prompt.';
+                console.error('Gemini API response structure unexpected:', result);
+            }
+        } catch (error) {
+            refinePromptOutput.textContent = 'Error refining prompt. Please try again.';
+            console.error('Error calling Gemini API:', error);
+        } finally {
+            refinePromptLoading.classList.add('hidden');
+        }
+    });
+
+});
+</script>
+
+</body>
+</html>
